@@ -1,6 +1,11 @@
 import { Invitation, RegistererState, Session, SessionState } from 'sip.js';
+import { CallStatus, ICall } from '../helpers/call';
 import { SipConnectionService } from './sip-connection.service';
 
+
+/**
+ * Listener for outgoing calls, manage calls state assignment
+ */
 export const inviterStateChangeListener = (
   sessionState: SessionState,
   session: Session,
@@ -14,7 +19,7 @@ export const inviterStateChangeListener = (
       self.sessionSubject$.next({ session, status: CallStatus.ONGOING });
       break;
     case SessionState.Established:
-      audio.setupRemoteMedia(session);
+      self.setupRemoteMedia(session);
       break;
     case SessionState.Terminating:
       break;
@@ -24,14 +29,17 @@ export const inviterStateChangeListener = (
         session,
         status: CallStatus.PREVIOUS,
       });
-      audio.cleanupMedia();
+      self.cleanupMedia();
       break;
     default:
       throw new Error('Unknown session state.');
   }
 };
-
-export const registereStateListener = (
+/**
+ * Listener for registerer events, will be used only for general state side effects
+ */
+// no need to listen for specific events of registerer as OnDisconnect of Delegate handles it
+export const registererStateListener = (
   newState: RegistererState,
   self: SipConnectionService
 ) => {
@@ -43,16 +51,18 @@ export const registereStateListener = (
     case RegistererState.Terminated:
       break;
   }
+  console.warn(`Registerer state changed: ${newState}`)
   self.clientConnectionStatus$.next(
-    `${self._credentials.authorizationUsername}-${newState}`
+    `${self.userAgentOptions.authorizationUsername}-${newState}`
   );
 };
-
+/**
+ * Listener for handling invitations state change
+ */
 export const invitationStateChangeListener = (
   state: SessionState,
   session: Invitation,
   self: SipConnectionService,
-  audio: SipAudioService
 ) => {
   switch (state) {
     case SessionState.Initial:
@@ -65,7 +75,7 @@ export const invitationStateChangeListener = (
         session,
         status: CallStatus.ONGOING,
       });
-      audio.setupRemoteMedia(session);
+      self.setupRemoteMedia(session);
       break;
     case SessionState.Terminating:
       break;
@@ -82,7 +92,7 @@ export const invitationStateChangeListener = (
           status: CallStatus.PREVIOUS,
         });
       }
-      audio.cleanupMedia();
+      self.cleanupMedia();
       break;
     default:
       throw new Error('Unknown session state.');

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@angular/core';
-import { Call, CallStatus, ConnectionAPI } from '@phx/types';
+
 import {
   RequestPendingError,
   Session,
@@ -9,17 +9,16 @@ import {
   SessionState,
 } from 'sip.js';
 import { SessionDescriptionHandler } from 'sip.js/lib/platform/web';
-import { PhonixUserAgentDelegate } from '../../helpers/phonix-user-agent-delegate';
-import { SipConnectionService } from '../sip-connection/sip-connection.service';
+import { CallStatus, ICall } from '../helpers/call';
+import { ConnectionAPI } from '../helpers/connection-api';
+import { SipConnectionService } from './sip-connection.service';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class CallConnectionApiService implements ConnectionAPI {
-  private delegate: PhonixUserAgentDelegate;
 
   localMicrophoneActive = true;
 
   constructor(private sipService: SipConnectionService) {
-    this.delegate = sipService.delegate;
   }
 
   acceptIncoming(): unknown {
@@ -34,7 +33,7 @@ export class CallConnectionApiService implements ConnectionAPI {
   hangUp(): unknown {
     throw new Error('Method not implemented.');
   }
-  toggleHold(hold: boolean, call: Call): Promise<void> {
+  toggleHold(hold: boolean, call: ICall): Promise<void> {
     if (!call.session) {
       return Promise.reject(new Error('Session does not exist.'));
     }
@@ -57,15 +56,15 @@ export class CallConnectionApiService implements ConnectionAPI {
           call.status = call.onHold ? CallStatus.PAUSED : CallStatus.ONGOING;
           this.enableReceiverTracks(!call.onHold, call.session);
           this.enableSenderTracks(!call.onHold && !call.muted, call.session);
-          if (this.delegate && this.delegate.onHold) {
-            this.delegate.onHold(call.session, call.onHold);
+          if (this.sipService.delegate && this.sipService.delegate.onHold) {
+            this.sipService.delegate.onHold(call.session, call.onHold);
           }
         },
         onReject: (): void => {
           this.enableReceiverTracks(!call.onHold, call.session);
           this.enableSenderTracks(!call.onHold && !call.muted, call.session);
-          if (this.delegate && this.delegate.onHold) {
-            this.delegate.onHold(call.session, call.onHold);
+          if (this.sipService.delegate && this.sipService.delegate.onHold) {
+            this.sipService.delegate.onHold(call.session, call.onHold);
           }
         },
       },
@@ -73,7 +72,7 @@ export class CallConnectionApiService implements ConnectionAPI {
 
     const sessionDescriptionHandlerOptions = call.session
       .sessionDescriptionHandlerOptionsReInvite as SessionDescriptionHandlerOptions;
-    sessionDescriptionHandlerOptions[`hold`] = hold;
+    (sessionDescriptionHandlerOptions as any).hold = hold;
     call.session.sessionDescriptionHandlerOptionsReInvite = sessionDescriptionHandlerOptions;
 
     return call.session
@@ -91,7 +90,7 @@ export class CallConnectionApiService implements ConnectionAPI {
       });
   }
 
-  toggleSound(mute: boolean, call: Call): Promise<void> {
+  toggleSound(mute: boolean, call: ICall): Promise<void> {
     const session = call.session;
     if (!session) {
       throw new Error(
@@ -109,14 +108,14 @@ export class CallConnectionApiService implements ConnectionAPI {
     return Promise.resolve();
   }
 
-  toggleLocalMicrophone(micOn: boolean, call: Call): Promise<void> {
+  toggleLocalMicrophone(micOn: boolean, call: ICall): Promise<void> {
     this.enableSenderTracks(micOn && !call.micActive, call.session);
     call.micActive = micOn;
     return Promise.resolve();
   }
 
   /** The local media stream. Undefined if call not answered. */
-  getLocalMediaStream(call: Call): MediaStream | undefined {
+  getLocalMediaStream(call: ICall): MediaStream | undefined {
     const sdh = call.session?.sessionDescriptionHandler;
     if (!sdh) {
       return undefined;
@@ -129,7 +128,7 @@ export class CallConnectionApiService implements ConnectionAPI {
     return sdh.localMediaStream;
   }
 
-  getRemoteMediaStream(call: Call): MediaStream | undefined {
+  getRemoteMediaStream(call: ICall): MediaStream | undefined {
     const sdh = call.session?.sessionDescriptionHandler;
     // below is neccessity for typescript strong typing while using SessionDescriptionHandler
     if (!sdh) {
@@ -143,7 +142,7 @@ export class CallConnectionApiService implements ConnectionAPI {
     return sdh.remoteMediaStream;
   }
 
-  getLocalAudioTrack(call: Call): MediaStream | undefined {
+  getLocalAudioTrack(call: ICall): MediaStream | undefined {
     const sdh = call.session?.sessionDescriptionHandler;
     // below is neccessity for typescript strong typing while using SessionDescriptionHandler
     if (!sdh) {
