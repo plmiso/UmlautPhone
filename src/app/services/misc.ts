@@ -5,7 +5,6 @@ import {
   Notification,
   Referral,
   Subscription,
-  UserAgentDelegate,
   UserAgentOptions,
   UserAgent,
 } from 'sip.js';

@@ -1,11 +1,18 @@
 import { Injectable } from '@angular/core';
 import * as lodash from 'lodash';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { RequestPendingError, SessionDescriptionHandlerOptions, SessionInviteOptions } from 'sip.js';
+import {
+  Invitation, Inviter,
+  RequestPendingError,
+  SessionDescriptionHandlerOptions,
+  SessionInviteOptions,
+  SessionState
+} from 'sip.js';
 import { SessionDescriptionHandler } from 'sip.js/lib/platform/web';
 import { CallStatus, ICall } from '../helpers/call';
 import { tempPhoneBookForSebastian } from './misc';
 import { SipConnectionService } from './sip-connection.service';
+import {OutgoingByeRequest} from "sip.js/lib/core";
 
 @Injectable({ providedIn: 'root' })
 export class CallsService {
@@ -157,15 +164,31 @@ export class CallsService {
     return true;
   }
 
-  getConnectionStatusSubject(): BehaviorSubject<string> {
-    return this.sipConnectionService.clientConnectionStatus$;
-  }
-
   call(targetID: string): Promise<ICall> {
     if (this.checkIfCallNotDuplicated(targetID)) {
       return this.sipConnectionService.invite(this.createInitCall(targetID));
     }
     return Promise.reject(() => console.warn('Call possibly duplicated'));
+  }
+
+  endCall(call: ICall): Promise<void | OutgoingByeRequest>{
+    const state = call.session.state
+    if (state === SessionState.Initial) {
+      return (call.session as Invitation).reject();
+    }
+    if (state === SessionState.Established) {
+      return call.session.bye();
+    }
+    if (state === SessionState.Establishing) {
+      return (call.session as Inviter).cancel();
+    }
+    return Promise.reject()
+  }
+
+  toggleLocalMicrophone(micOn: boolean, call: ICall): Promise<void> {
+    this.sipConnectionService.enableSenderTracks(micOn && !call.micActive, call.session);
+    call.micActive = micOn;
+    return Promise.resolve();
   }
 
 

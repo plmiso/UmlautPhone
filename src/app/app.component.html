@@ -242,11 +242,10 @@
                           style="
                             margin-top: 5px;
                             margin-bottom: 5px;
-                            margin-right: 8px;
+                            margin-right: 2px;
                             width: 72px !important;
                           "
-                        >
-                          Answer
+                        >Answer
                         </button>
                         <button
                         (click)="redHandphoneClick()"
@@ -260,7 +259,34 @@
                             width: 72px !important;
                           "
                         >
-                          Reject</button
+                          Reject</button>
+                        <button
+                          (click)="hold()"
+                          class="btn btn-sm btn-primary btn-danger"
+                          data-inline="true"
+                          id="holdbtn"
+                          style="
+                            margin-top: 5px;
+                            margin-bottom: 5px;
+                            margin-right: 2px;
+                            width: 72px !important;
+                          "
+                        >
+                          Hold</button
+                        >
+                        <button
+                          (click)="toggleMic()"
+                          class="btn btn-sm btn-primary btn-danger"
+                          data-inline="true"
+                          id="toggleMic"
+                          style="
+                            margin-top: 5px;
+                            margin-bottom: 5px;
+                            margin-right: 2px;
+                            width: 82px !important;
+                          "
+                        >
+                          Toggle mic</button
                         ><br />
                         <br />
                       </div>

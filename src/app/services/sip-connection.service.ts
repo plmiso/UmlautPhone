@@ -16,7 +16,6 @@ import {
   Message,
   Referral,
   Subscription,
-  UserAgentDelegate,
 } from 'sip.js';
 import {
   IncomingReferRequest,
@@ -248,47 +247,6 @@ export class SipConnectionService {
     return track;
   };
 
-  /** The local media stream. Undefined if call not answered. */
-  getLocalMediaStream(call: ICall): MediaStream | undefined {
-    const sdh = call.session?.sessionDescriptionHandler;
-    if (!sdh) {
-      return undefined;
-    }
-    if (!(sdh instanceof SessionDescriptionHandler)) {
-      throw new Error(
-        'Session description handler not instance of web SessionDescriptionHandler'
-      );
-    }
-    return sdh.localMediaStream;
-  }
-
-  getRemoteMediaStream(call: ICall): MediaStream | undefined {
-    const sdh = call.session?.sessionDescriptionHandler;
-    // below is neccessity for typescript strong typing while using SessionDescriptionHandler
-    if (!sdh) {
-      return undefined;
-    }
-    if (!(sdh instanceof SessionDescriptionHandler)) {
-      throw new Error(
-        'Session description handler not instance of web SessionDescriptionHandler'
-      );
-    }
-    return sdh.remoteMediaStream;
-  }
-
-  getLocalAudioTrack(call: ICall): MediaStream | undefined {
-    const sdh = call.session?.sessionDescriptionHandler;
-    // below is neccessity for typescript strong typing while using SessionDescriptionHandler
-    if (!sdh) {
-      return undefined;
-    }
-    if (!(sdh instanceof SessionDescriptionHandler)) {
-      throw new Error(
-        'Session description handler not instance of web SessionDescriptionHandler'
-      );
-    }
-    return sdh.localMediaStream;
-  }
 
   enableReceiverTracks(enable: boolean, session: Session): void {
     if (!session) {
@@ -337,5 +295,47 @@ export class SipConnectionService {
         sender.track.enabled = enable;
       }
     });
+  }
+
+  /** The local media stream. Undefined if call not answered. */
+  getLocalMediaStream(call: ICall): MediaStream | undefined {
+    const sdh = call.session?.sessionDescriptionHandler;
+    if (!sdh) {
+      return undefined;
+    }
+    if (!(sdh instanceof SessionDescriptionHandler)) {
+      throw new Error(
+        'Session description handler not instance of web SessionDescriptionHandler'
+      );
+    }
+    return sdh.localMediaStream;
+  }
+
+  getRemoteMediaStream(call: ICall): MediaStream | undefined {
+    const sdh = call.session?.sessionDescriptionHandler;
+    // below is neccessity for typescript strong typing while using SessionDescriptionHandler
+    if (!sdh) {
+      return undefined;
+    }
+    if (!(sdh instanceof SessionDescriptionHandler)) {
+      throw new Error(
+        'Session description handler not instance of web SessionDescriptionHandler'
+      );
+    }
+    return sdh.remoteMediaStream;
+  }
+
+  getLocalAudioTrack(call: ICall): MediaStream | undefined {
+    const sdh = call.session?.sessionDescriptionHandler;
+    // below is neccessity for typescript strong typing while using SessionDescriptionHandler
+    if (!sdh) {
+      return undefined;
+    }
+    if (!(sdh instanceof SessionDescriptionHandler)) {
+      throw new Error(
+        'Session description handler not instance of web SessionDescriptionHandler'
+      );
+    }
+    return sdh.localMediaStream;
   }
 }
