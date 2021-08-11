@@ -13,6 +13,8 @@ export class AppComponent {
   result = '';
   onHold = false;
 
+  user = `User: ${this.sipConnectionService.userAgentOptions.authorizationUsername}`
+
   call = {} as ICall;
 
 

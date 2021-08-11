@@ -6,6 +6,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 To be able to run app please do following:
 1. Install latest node stable from:  [Node download](https://nodejs.org/en/download/)
+2. 
 2.After node is installed, please open project directory in cmd and run 
 > npm install
 3. After app dependencies are installed, please run app with 
