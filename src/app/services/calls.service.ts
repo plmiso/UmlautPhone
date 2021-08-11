@@ -10,7 +10,6 @@ import {
 } from 'sip.js';
 import { SessionDescriptionHandler } from 'sip.js/lib/platform/web';
 import { CallStatus, ICall } from '../helpers/call';
-import { tempPhoneBookForSebastian } from './misc';
 import { SipConnectionService } from './sip-connection.service';
 import {OutgoingByeRequest} from "sip.js/lib/core";
 
@@ -82,12 +81,7 @@ export class CallsService {
 
   //temp for presentational purposes
   private assignTargetName(data: ICall) {
-    const result = tempPhoneBookForSebastian(
-      +data.session.remoteIdentity.uri.user!
-    );
-    return result === undefined
-      ? data.session.remoteIdentity.friendlyName
-      : result;
+    return data.session.remoteIdentity.friendlyName
   }
 
   private updatePropagators() {
@@ -134,14 +128,12 @@ export class CallsService {
   }
 
   private createInitCall(targetID: string) {
-    const targetName = tempPhoneBookForSebastian(
-      targetID.includes('@') ? +targetID.substr(4, 4) : +targetID
-    );
+    const targetName = targetID.includes('@') ? +targetID.substr(4, 4) : +targetID
     return {
       status: CallStatus.CALLING,
       targetID,
       targetName,
-    } as ICall;
+    } as any;
   }
 
   checkIfCallNotDuplicated(targetID: string) {
