@@ -54,6 +54,7 @@ export class SipConnectionService {
   //temp storage of created clients for presentation purpose
   client = {} as { registerer: Registerer; userAgent: UserAgent };
 
+  // not related to sip, only passing data through app
   sessionSubject$: Subject<any> = new Subject();
   propagateChange$: Subject<void> = new Subject();
 
@@ -79,23 +80,7 @@ export class SipConnectionService {
   }
 
 
-  invite(call: ICall): Promise<ICall> {
-    console.warn('Calling', call)
-    this.sessionSubject$.next(call);
-    this.askForAudioPermissions();
-    const inviter = this.generateInviter(call.targetID);
-    call.session = inviter;
-    inviter.stateChange.addListener((state: SessionState) =>
-      inviterStateChangeListener(state, inviter, this)
-    );
-    return inviter
-      .invite()
-      .then(() => call)
-      .catch(() => {
-        window.alert('Check mic settings in your browser');
-        return call;
-      });
-  }
+
 
   generateInviter(targetId: string): Inviter {
     if (this.client.userAgent.isConnected()) {
@@ -146,6 +131,24 @@ export class SipConnectionService {
           this.statics.MISSION_CTAS_LEVEL_HEADER
         ) as MissionCTASLevelEnum) || null,
     });
+  }
+
+  invite(call: ICall): Promise<ICall> {
+    console.warn('Calling', call)
+    this.sessionSubject$.next(call);
+    this.askForAudioPermissions();
+    const inviter = this.generateInviter(call.targetID);
+    call.session = inviter;
+    inviter.stateChange.addListener((state: SessionState) =>
+      inviterStateChangeListener(state, inviter, this)
+    );
+    return inviter
+      .invite()
+      .then(() => call)
+      .catch(() => {
+        window.alert('Check mic settings in your browser');
+        return call;
+      });
   }
 
   onDisconnect(self: SipConnectionService, error?: Error) {

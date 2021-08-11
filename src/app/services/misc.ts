@@ -22,22 +22,6 @@ export const randomCTASEnum = () => {
   ];
 };
 
-const phoneBook = {
-  [1013 as number]: 'Giovannis wife',
-  [1018 as number]: 'Peter',
-  [1019 as number]: 'Christian',
-  [1020 as number]: 'Żelisław',
-  [1021 as number]: 'Grzegorz',
-  [1022 as number]: 'Przemysław',
-  [1023 as number]: 'Miłosław',
-  [1024 as number]: 'Miłosz',
-  [1025 as number]: 'Bożydar',
-};
-
-export const tempPhoneBookForSebastian = (id: number) => {
-  return phoneBook[id];
-};
-
 export const SIPStatics = {
   URI_PREFIX: 'sip:',
   URI_POSTFIX: '@umlaut.opentelecom.it',
